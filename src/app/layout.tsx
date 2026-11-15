@@ -7,12 +7,16 @@ const unbounded = Unbounded({
   variable: "--font-unbounded",
   subsets: ["latin", "cyrillic"],
   display: "swap",
+  // Not preloaded: the hero poster is the LCP element and should get the bandwidth first.
+  preload: false,
 });
 
 const onest = Onest({
   variable: "--font-onest",
   subsets: ["latin", "cyrillic"],
   display: "swap",
+  // Not preloaded: the hero poster is the LCP element and should get the bandwidth first.
+  preload: false,
 });
 
 const title = "Под ключ: Telegram-боты, сайты и веб-сервисы | Александр, fullstack-разработчик";

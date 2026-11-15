@@ -26,7 +26,7 @@ export function HeroStageSlot() {
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={asset("/poster.webp")}
-        srcSet={`${asset("/poster-420.webp")} 420w, ${asset("/poster.webp")} 720w`}
+        srcSet={`${asset("/poster-420.webp")} 420w, ${asset("/poster-560.webp")} 560w, ${asset("/poster.webp")} 720w`}
         sizes="(min-width: 1024px) min(70vh, 42vw), min(84vw, 380px)"
         alt=""
         width={720}
