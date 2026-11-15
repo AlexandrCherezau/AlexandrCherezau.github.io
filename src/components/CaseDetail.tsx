@@ -16,7 +16,7 @@ export function CaseDetail({ item }: { item: CaseItem }) {
   const portrait = img.h > img.w;
 
   return (
-    <div className="grid md:grid-cols-[1.35fr_1fr]">
+    <div className="grid grid-cols-[minmax(0,1fr)] md:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
       <DialogClose
         className="keybtn keybtn--ghost keybtn--sm sticky top-3 z-10 col-span-full -mb-14 mr-3 mt-3 justify-self-end px-4 md:hidden"
         aria-label="Закрыть"
@@ -52,7 +52,7 @@ export function CaseDetail({ item }: { item: CaseItem }) {
         </div>
         {many && (
           <div className="mt-4 flex items-center justify-between gap-3">
-            <div className="flex gap-2 overflow-x-auto">
+            <div className="flex min-w-0 gap-2 overflow-x-auto p-1">
               {item.images.map((im, i) => (
                 <button
                   key={im.src}
