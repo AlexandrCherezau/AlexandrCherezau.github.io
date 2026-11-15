@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 // This module is loaded client-only (ssr: false), so reading window in state initialisers is safe.
 import { Component, useCallback, useEffect, useState, type ReactNode } from "react";
-import { BASE_PATH, asset } from "@/lib/assets";
+import { BASE_PATH } from "@/lib/assets";
 import { useHeroInput } from "./useHeroInput";
 
 const Scene = dynamic(() => import("./Scene"), { ssr: false });
@@ -13,13 +13,26 @@ const SEEN_KEY = "pk:assembled";
 
 type WebGLState = "yes" | "no";
 
+const SOFTWARE_RENDERER = /swiftshader|llvmpipe|softpipe|software|basic render/i;
+
+/** `?3d=force` keeps the 3D scene even on software rendering (handy for headless QA). */
+const force3d = () => new URLSearchParams(window.location.search).get("3d") === "force";
+
+/**
+ * WebGL with real GPU acceleration. Software rasterisers (no GPU, e.g. some old phones or headless audits)
+ * report a "major performance caveat"; those get the static poster instead of a janky scene.
+ */
 function detectWebGL(): boolean {
   try {
     const c = document.createElement("canvas");
-    const gl = c.getContext("webgl2") || c.getContext("webgl");
+    const opts: WebGLContextAttributes = { failIfMajorPerformanceCaveat: !force3d() };
+    const gl = c.getContext("webgl2", opts) ?? c.getContext("webgl", opts);
+    if (!gl) return false;
+    const info = gl.getExtension("WEBGL_debug_renderer_info");
+    const renderer = info ? String(gl.getParameter(info.UNMASKED_RENDERER_WEBGL)) : "";
     // Free the probe context right away: browsers cap the number of live WebGL contexts.
-    gl?.getExtension("WEBGL_lose_context")?.loseContext();
-    return !!gl;
+    gl.getExtension("WEBGL_lose_context")?.loseContext();
+    return force3d() || !SOFTWARE_RENDERER.test(renderer);
   } catch {
     return false;
   }
@@ -60,20 +73,14 @@ export class SceneBoundary extends Component<{ fallback: ReactNode; children: Re
   }
 }
 
-function Poster() {
-  return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={asset("/poster.webp")}
-      alt=""
-      width={900}
-      height={900}
-      className="pointer-events-none absolute left-1/2 top-1/2 w-[min(84%,380px)] -translate-x-1/2 -translate-y-1/2 select-none lg:left-[63%] lg:top-[46%] lg:w-[min(70vh,42vw)]"
-    />
-  );
+
+interface HeroStageProps {
+  heroRef: React.RefObject<HTMLElement | null>;
+  /** true while the 3D scene is (or will be) visible; false means "show the static poster". */
+  onSceneState: (live: boolean) => void;
 }
 
-export function HeroStage({ heroRef }: { heroRef: React.RefObject<HTMLElement | null> }) {
+export function HeroStage({ heroRef, onSceneState }: HeroStageProps) {
   const [webgl] = useState<WebGLState>(() => (detectWebGL() ? "yes" : "no"));
   const [env] = useState(() => ({
     mobile: window.matchMedia("(max-width: 767px), (pointer: coarse)").matches,
@@ -118,6 +125,12 @@ export function HeroStage({ heroRef }: { heroRef: React.RefObject<HTMLElement | 
   }, []);
   const onProgress = useCallback((v: number) => setProgress(v), []);
   const markFailed = useCallback(() => setFailed(true), []);
+  const onStart = useCallback(() => onSceneState(true), [onSceneState]);
+
+  // Poster is server-rendered; bring it back whenever the scene is unavailable.
+  useEffect(() => {
+    if (webgl === "no" || failed) onSceneState(false);
+  }, [webgl, failed, onSceneState]);
 
   const retry = () => {
     if (chunkFailed) {
@@ -132,16 +145,10 @@ export function HeroStage({ heroRef }: { heroRef: React.RefObject<HTMLElement | 
 
   const skipIntro = env.seen || env.reduced;
   const showLoader = webgl !== "no" && !failed && !assembled && !timedOut && !skipIntro;
-  const fallback = (
-    <>
-      <Poster />
-      <FailedNotice onRetry={retry} onMount={markFailed} />
-    </>
-  );
+  const fallback = <FailedNotice onRetry={retry} onMount={markFailed} />;
 
   return (
     <div className="absolute inset-0 z-[1]">
-      {webgl === "no" && <Poster />}
       {webgl === "yes" && failed && fallback}
       {webgl === "yes" && !failed && (
         <SceneBoundary key={attempt} fallback={fallback}>
@@ -156,6 +163,7 @@ export function HeroStage({ heroRef }: { heroRef: React.RefObject<HTMLElement | 
             onProgress={onProgress}
             onAssembled={onAssembled}
             onContextLost={markFailed}
+            onStart={onStart}
           />
         </SceneBoundary>
       )}

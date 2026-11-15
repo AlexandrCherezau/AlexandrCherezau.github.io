@@ -18,6 +18,7 @@ export interface SceneProps {
   onProgress: (value: number) => void;
   onAssembled: () => void;
   onContextLost: () => void;
+  onStart: () => void;
 }
 
 /** Reports real asset loading progress (GLB + glyph atlas) to the preloader. */
@@ -44,7 +45,7 @@ function Lights() {
 }
 
 function Scene(props: SceneProps) {
-  const { active, mobile, skipIntro, reducedMotion, assetVersion, basePath, input, onProgress, onAssembled, onContextLost } =
+  const { active, mobile, skipIntro, reducedMotion, assetVersion, basePath, input, onProgress, onAssembled, onContextLost, onStart } =
     props;
   const url = useMemo(() => {
     const q = assetVersion ? `?r=${assetVersion}` : "";
@@ -82,6 +83,7 @@ function Scene(props: SceneProps) {
             reducedMotion={reducedMotion}
             input={input}
             onAssembled={onAssembled}
+            onStart={onStart}
           />
         </Suspense>
       </Canvas>

@@ -28,9 +28,19 @@ interface KeyBallProps {
   reducedMotion: boolean;
   input: React.RefObject<HeroInput>;
   onAssembled: () => void;
+  onStart: () => void;
 }
 
-export function KeyBall({ url, count, cableSegments, skipIntro, reducedMotion, input, onAssembled }: KeyBallProps) {
+export function KeyBall({
+  url,
+  count,
+  cableSegments,
+  skipIntro,
+  reducedMotion,
+  input,
+  onAssembled,
+  onStart,
+}: KeyBallProps) {
   const gltf = useGLTF(url.glb, false, true);
   const atlas = useTexture(url.atlas);
   const viewport = useThree((s) => s.viewport);
@@ -83,6 +93,7 @@ export function KeyBall({ url, count, cableSegments, skipIntro, reducedMotion, i
     lastScatter: -1,
     lastAssemble: -1,
     announced: false,
+    started: false,
     rotX: 0,
     rotY: 0,
     spin: 0,
@@ -142,6 +153,10 @@ export function KeyBall({ url, count, cableSegments, skipIntro, reducedMotion, i
     const body = bodies.current;
     if (!g || !body) return;
     const inp = input.current;
+    if (!s.started) {
+      s.started = true;
+      onStart();
+    }
     // Advance by frame delta (clamped) so a hidden tab does not skip the intro.
     if (s.assemble < 1) s.assemble = clamp01(s.assemble + (Math.min(delta, 0.05) * 1000) / ASSEMBLE_MS);
     if (s.assemble >= 1 && !s.announced) {
