@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 // This module is loaded client-only (ssr: false), so reading window in state initialisers is safe.
 import { Component, useCallback, useEffect, useState, type ReactNode } from "react";
-import { BASE_PATH } from "@/lib/assets";
+import { BASE_PATH, SCENE_ASSETS, asset } from "@/lib/assets";
 import { useHeroInput } from "./useHeroInput";
 
 const Scene = dynamic(() => import("./Scene"), { ssr: false });
@@ -93,6 +93,12 @@ export function HeroStage({ heroRef, onSceneState }: HeroStageProps) {
   const [active, setActive] = useState(true);
   const [attempt, setAttempt] = useState(0);
   const [failed, setFailed] = useState(false);
+
+  // Warm the HTTP cache for the GLB and atlas while the three.js chunk is still downloading.
+  useEffect(() => {
+    if (webgl !== "yes") return;
+    for (const path of Object.values(SCENE_ASSETS)) fetch(asset(path)).catch(() => undefined);
+  }, [webgl]);
 
   useEffect(() => {
     const t = window.setTimeout(() => setTimedOut(true), PRELOADER_MAX_MS);
