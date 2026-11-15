@@ -1,0 +1,29 @@
+{
+  "popular": [
+    {
+      "title": "Telegram бот для кафе: меню, корзина и заказ на доставку",
+      "price": 2000,
+      "days": 5,
+      "url": "https://kwork.ru/script-programming/55455294/telegram-bot-dlya-kafe-menyu-korzina-i-zakaz-na-dostavku"
+    },
+    {
+      "title": "Лендинг под ключ на Next.js: быстрый, адаптивный, с формой заявки",
+      "price": 2000,
+      "days": 5,
+      "url": "https://kwork.ru/website-development/55455521/lending-pod-klyuch-na-next-js-bystriy-adaptivniy-s-formoy-zayavki"
+    },
+    {
+      "title": "Парсер цен конкурентов на Wildberries и Ozon в Google Таблицу",
+      "price": 2000,
+      "days": 4,
+      "url": "https://kwork.ru/script-programming/55455577/parser-tsen-konkurentov-na-wildberries-i-ozon-v-google-tablitsu"
+    },
+    {
+      "title": "Заявки с сайта в Telegram: формы Tilda, WordPress или своего сайта",
+      "price": 1000,
+      "days": 1,
+      "url": "https://kwork.ru/script-programming/55455460/zayavki-s-sayta-v-telegram-formy-tilda-wordpress-ili-svoego-sayta"
+    }
+  ],
+  "total": 30
+}

@@ -1,0 +1,97 @@
+{
+  "note": "Цена и срок взяты из кворка, на который ведёт кнопка. Это базовый пакет: точную стоимость называю после короткого брифа.",
+  "services": [
+    {
+      "id": "bot",
+      "title": "Telegram-боты",
+      "includes": [
+        "запись клиентов, заказы, квизы",
+        "оплата через ЮKassa или Telegram Stars",
+        "рассылки и управление прямо из бота",
+        "боты для MAX"
+      ],
+      "days": 4,
+      "price": 1500,
+      "kwork": "https://kwork.ru/script-programming/55455221/telegram-bot-dlya-zapisi-klientov-v-salon-barbershop-ili-studiyu",
+      "kworkTitle": "Бот для записи клиентов",
+      "tgUrl": "https://t.me/cherevichk_a?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5%21%20%D0%9D%D1%83%D0%B6%D0%B5%D0%BD%20Telegram-%D0%B1%D0%BE%D1%82%3A%20"
+    },
+    {
+      "id": "landing",
+      "title": "Лендинги",
+      "includes": [
+        "Next.js, адаптив под телефон",
+        "заявки с формы сразу в Telegram",
+        "PageSpeed выше 90",
+        "подключение домена и SSL"
+      ],
+      "days": 5,
+      "price": 2000,
+      "kwork": "https://kwork.ru/website-development/55455521/lending-pod-klyuch-na-next-js-bystriy-adaptivniy-s-formoy-zayavki",
+      "kworkTitle": "Лендинг под ключ на Next.js",
+      "tgUrl": "https://t.me/cherevichk_a?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5%21%20%D0%9D%D1%83%D0%B6%D0%B5%D0%BD%20%D0%BB%D0%B5%D0%BD%D0%B4%D0%B8%D0%BD%D0%B3%3A%20"
+    },
+    {
+      "id": "site",
+      "title": "Сайты",
+      "includes": [
+        "вёрстка по макету Figma",
+        "многостраничные сайты и каталоги",
+        "мультиязычность, оплата, личный кабинет",
+        "перенос и ускорение готового сайта"
+      ],
+      "days": 3,
+      "price": 1500,
+      "priceNote": "вёрстка по макету, сайт целиком считаю после брифа",
+      "kwork": "https://kwork.ru/frontend/55455533/vyorstka-sayta-po-maketu-figma-adaptivno-chisto-piksel-v-piksel",
+      "kworkTitle": "Вёрстка по макету Figma",
+      "tgUrl": "https://t.me/cherevichk_a?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5%21%20%D0%9D%D1%83%D0%B6%D0%B5%D0%BD%20%D1%81%D0%B0%D0%B9%D1%82%3A%20"
+    },
+    {
+      "id": "app",
+      "title": "Веб-приложения и CRM",
+      "includes": [
+        "личный кабинет и админка",
+        "CRM под ваш процесс заявок",
+        "интеграции с amoCRM, Битрикс24, API",
+        "FastAPI или NestJS, PostgreSQL"
+      ],
+      "days": 5,
+      "price": 2000,
+      "kwork": "https://kwork.ru/website-repair/55455601/admin-panel-ili-lichniy-kabinet-dlya-sayta-upravlenie-bez-programmista",
+      "kworkTitle": "Админ-панель или личный кабинет",
+      "tgUrl": "https://t.me/cherevichk_a?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5%21%20%D0%9D%D1%83%D0%B6%D0%BD%D0%BE%20%D0%B2%D0%B5%D0%B1-%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%3A%20"
+    },
+    {
+      "id": "parser",
+      "title": "Парсеры и автоматизация",
+      "includes": [
+        "цены и остатки Wildberries и Ozon",
+        "базы компаний из Яндекс Карт",
+        "мониторинг Авито с уведомлением в Telegram",
+        "выгрузка в Excel и Google Таблицы"
+      ],
+      "days": 3,
+      "price": 1500,
+      "kwork": "https://kwork.ru/script-programming/55455594/sbor-bazy-kompaniy-iz-yandeks-kart-i-spravochnikov-v-excel-po-nishe",
+      "kworkTitle": "Сбор базы компаний в Excel",
+      "tgUrl": "https://t.me/cherevichk_a?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5%21%20%D0%9D%D1%83%D0%B6%D0%B5%D0%BD%20%D0%BF%D0%B0%D1%80%D1%81%D0%B5%D1%80%20%D0%B8%D0%BB%D0%B8%20%D0%B0%D0%B2%D1%82%D0%BE%D0%BC%D0%B0%D1%82%D0%B8%D0%B7%D0%B0%D1%86%D0%B8%D1%8F%3A%20"
+    },
+    {
+      "id": "ai",
+      "title": "AI-агенты",
+      "includes": [
+        "ассистент для заявок и поддержки",
+        "ответы на отзывы Wildberries и Ozon",
+        "расшифровка созвонов с конспектом",
+        "распознавание сканов и PDF в Excel"
+      ],
+      "days": 3,
+      "price": 1500,
+      "kwork": "https://kwork.ru/script-programming/55455670/avtootvety-na-otzyvy-wildberries-i-ozon-s-pomoshchyu-ii",
+      "kworkTitle": "Автоответы на отзывы с ИИ",
+      "tgUrl": "https://t.me/cherevichk_a?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5%21%20%D0%9D%D1%83%D0%B6%D0%B5%D0%BD%20AI-%D0%B0%D0%B3%D0%B5%D0%BD%D1%82%3A%20"
+    }
+  ],
+  "checkedAt": "2026-11-15"
+}
