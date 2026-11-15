@@ -195,6 +195,10 @@ html.lenis body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
   *,
   *::before,
   *::after {

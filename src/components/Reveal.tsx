@@ -9,6 +9,7 @@ export function Reveal({ children, delay = 0, className }: { children: ReactNode
   return (
     <LazyMotion features={domAnimation} strict>
       <m.div
+        data-reveal
         className={className}
         initial={reduced ? false : { opacity: 0, y: 28 }}
         whileInView={{ opacity: 1, y: 0 }}

@@ -1,6 +1,7 @@
 "use client";
 
-import { Suspense, useEffect } from "react";
+import { Suspense, memo, useEffect, useMemo } from "react";
+import { SCENE_ASSETS } from "@/lib/assets";
 import { Canvas } from "@react-three/fiber";
 import { Environment, Lightformer, useProgress } from "@react-three/drei";
 import { KeyBall } from "./KeyBall";
@@ -16,7 +17,7 @@ export interface SceneProps {
   input: React.RefObject<HeroInput>;
   onProgress: (value: number) => void;
   onAssembled: () => void;
-  onReady: () => void;
+  onContextLost: () => void;
 }
 
 /** Reports real asset loading progress (GLB + glyph atlas) to the preloader. */
@@ -33,7 +34,7 @@ function Lights() {
       <directionalLight position={[-4, 6, 6]} intensity={2.1} color="#fff4e0" />
       <directionalLight position={[5, -2, -4]} intensity={0.9} color="#9fd6c4" />
       {/* Procedural studio environment: no HDR download. */}
-      <Environment resolution={128} frames={1}>
+      <Environment resolution={128} frames={1} environmentIntensity={0.9}>
         <Lightformer form="rect" intensity={2.2} position={[0, 4, 4]} scale={[8, 2, 1]} color="#fff7e8" />
         <Lightformer form="rect" intensity={1.2} position={[-5, 0, 2]} scale={[2, 6, 1]} color="#f5c542" />
         <Lightformer form="rect" intensity={0.8} position={[5, 1, -2]} scale={[2, 6, 1]} color="#bfe6d8" />
@@ -42,11 +43,13 @@ function Lights() {
   );
 }
 
-export default function Scene(props: SceneProps) {
-  const { active, mobile, skipIntro, reducedMotion, assetVersion, basePath, input, onProgress, onAssembled, onReady } =
+function Scene(props: SceneProps) {
+  const { active, mobile, skipIntro, reducedMotion, assetVersion, basePath, input, onProgress, onAssembled, onContextLost } =
     props;
-  const q = assetVersion ? `?r=${assetVersion}` : "";
-  const url = { glb: `${basePath}/3d/keycap.glb${q}`, atlas: `${basePath}/3d/glyphs.webp${q}` };
+  const url = useMemo(() => {
+    const q = assetVersion ? `?r=${assetVersion}` : "";
+    return { glb: `${basePath}${SCENE_ASSETS.glb}${q}`, atlas: `${basePath}${SCENE_ASSETS.atlas}${q}` };
+  }, [assetVersion, basePath]);
 
   return (
     <>
@@ -56,7 +59,16 @@ export default function Scene(props: SceneProps) {
         dpr={mobile ? [1, 1.5] : [1, 1.75]}
         gl={{ antialias: !mobile, alpha: true, powerPreference: "high-performance" }}
         camera={{ position: [0, 0, 11], fov: 35 }}
-        onCreated={onReady}
+        onCreated={({ gl }) => {
+          gl.domElement.addEventListener(
+            "webglcontextlost",
+            (e) => {
+              e.preventDefault();
+              onContextLost();
+            },
+            { once: true },
+          );
+        }}
         style={{ position: "absolute", inset: 0 }}
         aria-hidden
       >
@@ -76,3 +88,5 @@ export default function Scene(props: SceneProps) {
     </>
   );
 }
+
+export default memo(Scene);

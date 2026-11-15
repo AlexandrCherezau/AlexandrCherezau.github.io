@@ -37,6 +37,7 @@ export function useHeroInput(heroRef: React.RefObject<HTMLElement | null>, enabl
     onScroll();
     window.addEventListener("pointermove", onPointer, { passive: true });
     window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
     // iOS needs an explicit permission prompt for tilt; we only listen where it is available freely.
     const DOE = typeof window !== "undefined" ? window.DeviceOrientationEvent : undefined;
     const needsPermission =
@@ -46,6 +47,7 @@ export function useHeroInput(heroRef: React.RefObject<HTMLElement | null>, enabl
     return () => {
       window.removeEventListener("pointermove", onPointer);
       window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
       if (tiltOn) window.removeEventListener("deviceorientation", onTilt);
     };
   }, [enabled, heroRef]);

@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 // This module is loaded client-only (ssr: false), so reading window in state initialisers is safe.
 import { Component, useCallback, useEffect, useState, type ReactNode } from "react";
-import { BASE_PATH, asset } from "@/lib/content";
+import { BASE_PATH, asset } from "@/lib/assets";
 import { useHeroInput } from "./useHeroInput";
 
 const Scene = dynamic(() => import("./Scene"), { ssr: false });
@@ -16,7 +16,10 @@ type WebGLState = "yes" | "no";
 function detectWebGL(): boolean {
   try {
     const c = document.createElement("canvas");
-    return !!(c.getContext("webgl2") || c.getContext("webgl"));
+    const gl = c.getContext("webgl2") || c.getContext("webgl");
+    // Free the probe context right away: browsers cap the number of live WebGL contexts.
+    gl?.getExtension("WEBGL_lose_context")?.loseContext();
+    return !!gl;
   } catch {
     return false;
   }
@@ -38,13 +41,19 @@ function writeSeen() {
   }
 }
 
-class SceneBoundary extends Component<{ fallback: ReactNode; children: ReactNode }, { failed: boolean }> {
+/** next/dynamic caches a rejected chunk import, so only a reload can recover from it. */
+let chunkFailed = false;
+const isChunkError = (e: unknown) =>
+  e instanceof Error && /chunk|dynamically imported module|Importing a module script failed/i.test(`${e.name} ${e.message}`);
+
+export class SceneBoundary extends Component<{ fallback: ReactNode; children: ReactNode }, { failed: boolean }> {
   state = { failed: false };
   static getDerivedStateFromError() {
     return { failed: true };
   }
   componentDidCatch(error: unknown) {
     console.warn("3D scene failed, showing poster instead", error);
+    if (isChunkError(error)) chunkFailed = true;
   }
   render() {
     return this.state.failed ? this.props.fallback : this.props.children;
@@ -59,7 +68,7 @@ function Poster() {
       alt=""
       width={900}
       height={900}
-      className="pointer-events-none absolute left-1/2 top-1/2 w-[min(84%,380px)] -translate-x-1/2 -translate-y-1/2 select-none md:left-[63%] md:top-[46%] md:w-[min(70vh,42vw)]"
+      className="pointer-events-none absolute left-1/2 top-1/2 w-[min(84%,380px)] -translate-x-1/2 -translate-y-1/2 select-none lg:left-[63%] lg:top-[46%] lg:w-[min(70vh,42vw)]"
     />
   );
 }
@@ -108,12 +117,17 @@ export function HeroStage({ heroRef }: { heroRef: React.RefObject<HTMLElement | 
     writeSeen();
   }, []);
   const onProgress = useCallback((v: number) => setProgress(v), []);
-  const noop = useCallback(() => {}, []);
   const markFailed = useCallback(() => setFailed(true), []);
 
   const retry = () => {
+    if (chunkFailed) {
+      window.location.reload();
+      return;
+    }
     setFailed(false);
     setAttempt((a) => a + 1);
+    // The retry button unmounts with the old scene: keep keyboard focus on the hero.
+    heroRef.current?.focus({ preventScroll: true });
   };
 
   const skipIntro = env.seen || env.reduced;
@@ -126,9 +140,10 @@ export function HeroStage({ heroRef }: { heroRef: React.RefObject<HTMLElement | 
   );
 
   return (
-    <div className="absolute inset-0 z-[1]" aria-hidden={!failed}>
+    <div className="absolute inset-0 z-[1]">
       {webgl === "no" && <Poster />}
-      {webgl === "yes" && (
+      {webgl === "yes" && failed && fallback}
+      {webgl === "yes" && !failed && (
         <SceneBoundary key={attempt} fallback={fallback}>
           <Scene
             active={active}
@@ -140,15 +155,14 @@ export function HeroStage({ heroRef }: { heroRef: React.RefObject<HTMLElement | 
             input={input}
             onProgress={onProgress}
             onAssembled={onAssembled}
-            onReady={noop}
+            onContextLost={markFailed}
           />
         </SceneBoundary>
       )}
       {showLoader && (
-        <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center md:left-[63%] md:top-[46%]">
-          <div className="h-display text-[clamp(48px,7vw,96px)] tabular-nums text-cream/90" role="status">
+        <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center lg:left-[63%] lg:top-[46%]">
+          <div className="h-display text-[clamp(48px,7vw,96px)] tabular-nums text-cream/90" aria-hidden>
             {String(Math.round(progress)).padStart(2, "0")}
-            <span className="sr-only"> процентов загружено</span>
           </div>
           <div className="mt-2 text-sm text-moss">собираю клавиши</div>
         </div>
@@ -160,7 +174,7 @@ export function HeroStage({ heroRef }: { heroRef: React.RefObject<HTMLElement | 
 function FailedNotice({ onRetry, onMount }: { onRetry: () => void; onMount: () => void }) {
   useEffect(onMount, [onMount]);
   return (
-    <div className="absolute bottom-2 left-1/2 flex w-[90%] -translate-x-1/2 flex-col items-center gap-3 text-center text-sm text-moss md:bottom-[22%] md:left-[60%] md:w-auto">
+    <div className="absolute bottom-2 left-1/2 flex w-[90%] -translate-x-1/2 flex-col items-center gap-3 text-center text-sm text-moss lg:bottom-[22%] lg:left-[60%] lg:w-auto">
       <p>3D не загрузилось. Это не мешает читать сайт.</p>
       <button type="button" onClick={onRetry} className="keybtn keybtn--ghost keybtn--sm">
         Повторить

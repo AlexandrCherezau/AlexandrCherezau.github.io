@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { asset, caseKinds, type CaseItem } from "@/lib/content";
+import { asset } from "@/lib/assets";
+import { caseKinds } from "@/lib/cases";
+import type { CaseItem } from "@/lib/content";
 import { DialogClose, DialogTitle } from "./ui/dialog";
 import { ArrowIcon } from "./Icon";
 
@@ -14,15 +16,29 @@ export function CaseDetail({ item }: { item: CaseItem }) {
   const portrait = img.h > img.w;
 
   return (
-    <div
-      className="grid md:grid-cols-[1.35fr_1fr]"
-      onKeyDown={(e) => {
-        if (!many) return;
-        if (e.key === "ArrowRight") go(1);
-        if (e.key === "ArrowLeft") go(-1);
-      }}
-    >
-      <div className="relative flex flex-col bg-pine-950 p-4 md:p-6">
+    <div className="grid md:grid-cols-[1.35fr_1fr]">
+      <DialogClose
+        className="keybtn keybtn--ghost keybtn--sm sticky top-3 z-10 col-span-full -mb-14 mr-3 mt-3 justify-self-end px-4 md:hidden"
+        aria-label="Закрыть"
+      >
+        <CloseIcon />
+      </DialogClose>
+      <div
+        className="relative flex flex-col bg-pine-950 p-4 md:p-6"
+        role="group"
+        aria-roledescription="галерея"
+        aria-label={`Скриншоты: ${item.title}`}
+        onKeyDown={(e) => {
+          if (!many || e.altKey || e.ctrlKey || e.metaKey) return;
+          if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+            e.preventDefault();
+            go(e.key === "ArrowRight" ? 1 : -1);
+          }
+        }}
+      >
+        <p className="sr-only" aria-live="polite">
+          Скриншот {index + 1} из {item.images.length}
+        </p>
         <div className="relative flex min-h-[240px] flex-1 items-center justify-center overflow-hidden rounded-xl md:min-h-[420px]">
           <Image
             key={img.src}
@@ -43,12 +59,12 @@ export function CaseDetail({ item }: { item: CaseItem }) {
                   type="button"
                   onClick={() => setIndex(i)}
                   aria-label={`Показать: ${im.alt}`}
-                  aria-current={i === index}
+                  aria-pressed={i === index}
                   className={`h-14 w-20 shrink-0 overflow-hidden rounded-md ring-2 transition ${
                     i === index ? "ring-enter" : "ring-transparent opacity-60 hover:opacity-100"
                   }`}
                 >
-                  <Image src={asset(im.src)} alt="" width={160} height={112} className="h-full w-full object-cover object-top" />
+                  <Image src={asset(im.src)} alt="" width={160} height={112} loading="lazy" className="h-full w-full object-cover object-top" />
                 </button>
               ))}
             </div>
@@ -72,17 +88,15 @@ export function CaseDetail({ item }: { item: CaseItem }) {
             </p>
             <DialogTitle className="mt-1 text-[26px] font-semibold leading-tight">{item.title}</DialogTitle>
           </div>
-          <DialogClose className="keybtn keybtn--ghost keybtn--sm shrink-0 px-4" aria-label="Закрыть">
-            <svg viewBox="0 0 20 20" className="h-4 w-4" aria-hidden>
-              <path d="M5 5l10 10M15 5 5 15" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-            </svg>
+          <DialogClose className="keybtn keybtn--ghost keybtn--sm hidden shrink-0 px-4 md:inline-flex" aria-label="Закрыть">
+            <CloseIcon />
           </DialogClose>
         </div>
         <Block title="Задача">{item.task}</Block>
         <Block title="Решение">{item.solution}</Block>
         <Block title="Результат">{item.result}</Block>
         <div>
-          <h4 className="mb-2 text-sm text-moss">Стек</h4>
+          <h3 className="mb-2 text-sm text-moss">Стек</h3>
           <ul className="flex flex-wrap gap-2">
             {item.stack.map((s) => (
               <li key={s} className="rounded-md bg-pine-850 px-2.5 py-1 text-[14px] ring-1 ring-pine-700">
@@ -106,10 +120,18 @@ export function CaseDetail({ item }: { item: CaseItem }) {
   );
 }
 
+function CloseIcon() {
+  return (
+    <svg viewBox="0 0 20 20" className="h-4 w-4" aria-hidden>
+      <path d="M5 5l10 10M15 5 5 15" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 function Block({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div>
-      <h4 className="mb-1.5 text-sm text-moss">{title}</h4>
+      <h3 className="mb-1.5 text-sm text-moss">{title}</h3>
       <p className="text-[16px] leading-relaxed text-cream/90">{children}</p>
     </div>
   );

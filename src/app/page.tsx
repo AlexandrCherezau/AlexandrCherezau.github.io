@@ -15,13 +15,13 @@ export default function Home() {
   return (
     <>
       <a
-        href="#services"
+        href="#main"
         className="sr-only z-50 rounded-md bg-enter px-4 py-2 text-ink focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
       >
         К содержимому
       </a>
       <Header />
-      <main>
+      <main id="main" tabIndex={-1} className="outline-none">
         <Hero />
         <Services />
         <Cases />

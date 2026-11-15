@@ -33,7 +33,9 @@ interface KeyBallProps {
 export function KeyBall({ url, count, cableSegments, skipIntro, reducedMotion, input, onAssembled }: KeyBallProps) {
   const gltf = useGLTF(url.glb, false, true);
   const atlas = useTexture(url.atlas);
-  const { viewport, size, invalidate } = useThree();
+  const viewport = useThree((s) => s.viewport);
+  const size = useThree((s) => s.size);
+  const invalidate = useThree((s) => s.invalidate);
 
   const keys = useMemo(() => buildKeys(count), [count]);
   const keyGeometry = useMemo(() => {
@@ -62,7 +64,6 @@ export function KeyBall({ url, count, cableSegments, skipIntro, reducedMotion, i
       t.anisotropy = 4;
       t.repeat.set(1 / ATLAS_COLS, 1 / ATLAS_COLS);
       t.offset.set((g % ATLAS_COLS) / ATLAS_COLS, 1 - (Math.floor(g / ATLAS_COLS) + 1) / ATLAS_COLS);
-      t.needsUpdate = true;
       return t;
     });
   }, [atlas]);
@@ -78,7 +79,6 @@ export function KeyBall({ url, count, cableSegments, skipIntro, reducedMotion, i
   const legends = useRef<(THREE.InstancedMesh | null)[]>([]);
   const cableMat = useRef<THREE.MeshStandardMaterial>(null);
   const state = useRef({
-    started: 0,
     assemble: skipIntro || reducedMotion ? 1 : 0,
     lastScatter: -1,
     lastAssemble: -1,
@@ -122,6 +122,7 @@ export function KeyBall({ url, count, cableSegments, skipIntro, reducedMotion, i
       mat: new THREE.Matrix4(),
       legendLocal: new THREE.Matrix4().makeTranslation(0, LEGEND_LIFT, 0),
       up: new THREE.Vector3(0, 1, 0),
+      counters: new Uint16Array(GLYPH_COUNT),
     }),
     [],
   );
@@ -140,11 +141,9 @@ export function KeyBall({ url, count, cableSegments, skipIntro, reducedMotion, i
     const g = group.current;
     const body = bodies.current;
     if (!g || !body) return;
-    const now = performance.now();
-    if (!s.started) s.started = now;
     const inp = input.current;
-
-    if (s.assemble < 1) s.assemble = clamp01((now - s.started) / ASSEMBLE_MS);
+    // Advance by frame delta (clamped) so a hidden tab does not skip the intro.
+    if (s.assemble < 1) s.assemble = clamp01(s.assemble + (Math.min(delta, 0.05) * 1000) / ASSEMBLE_MS);
     if (s.assemble >= 1 && !s.announced) {
       s.announced = true;
       onAssembled();
@@ -156,7 +155,7 @@ export function KeyBall({ url, count, cableSegments, skipIntro, reducedMotion, i
     if (needsKeys) {
       s.lastAssemble = s.assemble;
       s.lastScatter = scatter;
-      const counters = new Array<number>(GLYPH_COUNT).fill(0);
+      const counters = tmp.counters.fill(0);
       for (let i = 0; i < keys.length; i++) {
         const k = keys[i];
         const local = easeOutCubic(clamp01((s.assemble - k.delay) / (1 - STAGGER)));
@@ -180,7 +179,10 @@ export function KeyBall({ url, count, cableSegments, skipIntro, reducedMotion, i
         }
       }
       body.instanceMatrix.needsUpdate = true;
-      legends.current.forEach((m) => m && (m.instanceMatrix.needsUpdate = true));
+      for (let g2 = 0; g2 < legends.current.length; g2++) {
+        const m = legends.current[g2];
+        if (m) m.instanceMatrix.needsUpdate = true;
+      }
       if (cableMat.current) {
         const cableIn = clamp01((s.assemble - 0.55) / 0.45);
         cableMat.current.opacity = cableIn * (1 - clamp01(scatter * 1.6));
@@ -205,7 +207,7 @@ export function KeyBall({ url, count, cableSegments, skipIntro, reducedMotion, i
         <meshStandardMaterial color="#0b120f" roughness={0.9} />
       </mesh>
       <instancedMesh ref={bodies} args={[keyGeometry, undefined, keys.length]} frustumCulled={false}>
-        <meshStandardMaterial roughness={0.48} metalness={0} envMapIntensity={0.9} />
+        <meshStandardMaterial roughness={0.48} metalness={0} />
       </instancedMesh>
       {glyphGroups.map((idx, g) =>
         idx.length ? (

@@ -26,7 +26,8 @@ export function Cursor() {
       cx += (x - cx) * 0.25;
       cy += (y - cy) * 0.25;
       el.style.transform = `translate3d(${cx}px, ${cy}px, 0) translate(-50%, -50%)`;
-      raf = requestAnimationFrame(tick);
+      // Sleep when the dot has caught up; the next pointermove wakes it.
+      raf = Math.abs(x - cx) + Math.abs(y - cy) > 0.2 ? requestAnimationFrame(tick) : 0;
     };
     const onMove = (e: PointerEvent) => {
       x = e.clientX;
@@ -37,6 +38,7 @@ export function Cursor() {
         cy = y;
         el.style.opacity = "1";
       }
+      if (!raf) raf = requestAnimationFrame(tick);
       const target = e.target as Element | null;
       el.dataset.hover = target?.closest(INTERACTIVE) ? "1" : "0";
     };
@@ -44,13 +46,12 @@ export function Cursor() {
       shown = false;
       el.style.opacity = "0";
     };
-    raf = requestAnimationFrame(tick);
     window.addEventListener("pointermove", onMove, { passive: true });
-    document.documentElement.addEventListener("pointerleave", onLeave);
+    document.addEventListener("mouseleave", onLeave);
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("pointermove", onMove);
-      document.documentElement.removeEventListener("pointerleave", onLeave);
+      document.removeEventListener("mouseleave", onLeave);
       document.documentElement.classList.remove("has-cursor");
     };
   }, []);

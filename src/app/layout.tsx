@@ -1,4 +1,6 @@
 import type { Metadata, Viewport } from "next";
+import { preload } from "react-dom";
+import { SCENE_ASSETS, asset } from "@/lib/assets";
 import { Onest, Unbounded } from "next/font/google";
 import { services, site } from "@/lib/content";
 import "./globals.css";
@@ -80,9 +82,15 @@ const jsonLd = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  // Start fetching the 3D assets with the HTML instead of after the three.js chunk loads.
+  preload(asset(SCENE_ASSETS.glb), { as: "fetch", crossOrigin: "anonymous" });
+  preload(asset(SCENE_ASSETS.atlas), { as: "image", crossOrigin: "anonymous" });
   return (
     <html lang="ru" className={`${unbounded.variable} ${onest.variable}`}>
       <body>
+        <noscript>
+          <style>{"[data-reveal]{opacity:1!important;transform:none!important}"}</style>
+        </noscript>
         {children}
         <script
           type="application/ld+json"
